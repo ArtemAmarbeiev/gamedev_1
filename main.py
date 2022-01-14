@@ -156,4 +156,68 @@ class Mobse(pg.sprite.Sprite):
             self.pos.y = HEIGHT
         self.rect.center = self.pos
 
+class Mob(pg.sprite.Sprite):
+    def __init__(self):
+        self.groups = all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pg.image.load("bun.png")
+        self.image = pg.transform.scale(self.image, (20, 20))
+        self.rect = self.image.get_rect()
+        self.pos = vec(randint(0, WIDTH), randint(0, HEIGHT))
+        self.vel = vec(MAX_SPEED, 0).rotate(uniform(0, 360))
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.last_update = 0
+        self.target = vec(randint(0, WIDTH), randint(0, HEIGHT))
 
+    def seek(self, target):
+        self.desired = (target - self.pos).normalize() * MAX_SPEED
+        steer = (self.desired - self.vel)
+        if steer.length() > MAX_FORCE:
+            steer.scale_to_length(MAX_FORCE)
+        return steer
+
+    def wander_improved(self):
+        future = self.pos + self.vel.normalize() * WANDER_RING_DISTANCE
+        target = future + vec(WANDER_RING_RADIUS, 0).rotate(uniform(0, 360))
+        self.displacement = target
+        return self.seek(target)
+
+    def wander(self):
+        # select random target every few sec
+        now = pg.time.get_ticks()
+        if now - self.last_update > RAND_TARGET_TIME:
+            self.last_update = now
+            self.target = vec(randint(0, WIDTH), randint(0, HEIGHT))
+        return self.seek(self.target)
+
+    def update(self):
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                self.kill()
+
+        if WANDER_TYPE == 1:
+            self.acc = self.wander()
+        else:
+            self.acc = self.wander_improved()
+        # equations of motion
+        self.vel += self.acc
+        if self.vel.length() > MAX_SPEED:
+            self.vel.scale_to_length(MAX_SPEED)
+        self.pos += self.vel
+        if self.pos.x > WIDTH:
+            self.pos.x = 0
+        if self.pos.x < 0:
+            self.pos.x = WIDTH
+        if self.pos.y > HEIGHT:
+            self.pos.y = 0
+        if self.pos.y < 0:
+            self.pos.y = HEIGHT
+        self.rect.center = self.pos
+
+
+def normalize_vector(vector):
+    if vector == [0, 0]:
+        return [0, 0]    
+    pythagoras = math.sqrt(vector[0]*vector[0] + vector[1]*vector[1])
+    return (vector[0] / pythagoras, vector[1] / pythagoras)
