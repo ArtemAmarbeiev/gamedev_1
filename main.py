@@ -221,3 +221,82 @@ def normalize_vector(vector):
         return [0, 0]    
     pythagoras = math.sqrt(vector[0]*vector[0] + vector[1]*vector[1])
     return (vector[0] / pythagoras, vector[1] / pythagoras)
+class Player(pygame.sprite.Sprite):
+    projectiles = pygame.sprite.Group()
+    def __init__(self, screenSize):
+        self.groups = all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pygame.image.load("hunt.png")
+        self.image = pygame.transform.scale(self.image, (20, 20))
+        self.rect = self.image.get_rect(x=screenSize[0]//2,
+                                        y=screenSize[1]//2)
+        
+        self.pos = [screenSize[0] // 2, screenSize[1] // 2]
+        self.health = 3
+        self.alive = True
+        self.movementVector = [0, 0]
+        self.movementSpeed = 3
+        self.availableWeapons = [Weapon.Pistol(),
+                                 Weapon.Shotgun(),
+                                 Weapon.MachineGun()]
+        self.equippedWeapon = self.availableWeapons[0]
+
+    def move(self, screenSize, tDelta):
+        self.movementVector = normalize_vector(self.movementVector)
+        newPos = (self.pos[0] + self.movementVector[0]*self.movementSpeed*tDelta,
+                  self.pos[1] + self.movementVector[1]*self.movementSpeed*tDelta)
+        if newPos[0] < 0:
+            self.pos[0] = 0
+        elif newPos[0] > screenSize[0] - self.rect.width:
+            self.pos[0] = screenSize[0] - self.rect.width
+        else:
+            self.pos[0] = newPos[0]
+
+        if newPos[1] < 0:
+            self.pos[1] = 0
+        elif newPos[1] > screenSize[1]-self.rect.height:
+            self.pos[1] = screenSize[1]-self.rect.width
+        else:
+            self.pos[1] = newPos[1]
+        
+        self.rect.topleft = self.pos
+        self.movementVector = [0, 0]
+        
+    def shoot(self, mousePos):
+        self.equippedWeapon.shoot(self, mousePos)
+        
+    def render(self, surface):
+        surface.blit(self.image, self.pos)
+
+class Wall(object):
+    def __init__(self, x, y, w = 16, h = 16):
+        self.rect = pygame.Rect(x, y, w, h)
+
+        
+def process_mouse(mouse, hero):
+    if mouse[0]:
+        hero.sprite.shoot(pg.mouse.get_pos())
+
+def render_entities(hero):
+    hero.sprite.render(screen)
+    for proj in Player.projectiles:
+        proj.render(screen)
+
+
+def move_entities(hero, timeDelta):
+    score = 0
+    hero.sprite.move(screen.get_size(), timeDelta)
+    # for proj in Wolf.projectiles:
+    #     proj.move(screen.get_size(), timeDelta)
+    #     if pygame.sprite.spritecollide(proj, hero, False):
+    #         proj.kill()
+    #         hero.sprite.health -= 1
+    #         if hero.sprite.health <= 0:
+    #             hero.sprite.alive = False
+    # for proj in Player.projectiles:
+    #     proj.move(screen.get_size(), timeDelta)
+    #     enemiesHit = pygame.sprite.spritecollide(proj, enemies, True)
+    #     if enemiesHit:
+    #         proj.kill()
+    #         score += len(enemiesHit)
+    return score
