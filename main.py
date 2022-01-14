@@ -104,3 +104,56 @@ class Mobby(pg.sprite.Sprite):
         if self.pos.y < 0:
             self.pos.y = HEIGHT
         self.rect.center = self.pos
+        
+class Mobse(pg.sprite.Sprite):
+    def __init__(self):
+        self.groups = all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pg.image.load("lun.png")
+        self.image = pg.transform.scale(self.image, (20, 20))
+        self.rect = self.image.get_rect()
+        self.pos = vec(randint(0, WIDTH), randint(0, HEIGHT))
+        self.vel = vec(MAX_SPEED, 0).rotate(uniform(0, 360))
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+
+    def follow_mouse(self):
+        mpos = pg.mouse.get_pos()
+        self.acc = (mpos - self.pos).normalize() * 0.5
+
+    def flee(self, target):
+        steer = vec(0, 0)
+        dist = self.pos - target
+        if dist.length() < FLEE_DISTANCE:
+            self.desired = (self.pos - target).normalize() * MAX_SPEED
+        else:
+            self.desired = self.vel.normalize() * MAX_SPEED
+        steer = (self.desired - self.vel)
+        if steer.length() > MAX_FORCE:
+            steer.scale_to_length(MAX_FORCE)
+        return steer
+
+    def update(self):
+        # self.follow_mouse()
+
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                 self.kill()
+
+        self.acc = self.flee(pg.mouse.get_pos())
+        # equations of motion
+        self.vel += self.acc
+        if self.vel.length() > MAX_SPEED:
+            self.vel.scale_to_length(MAX_SPEED)
+        self.pos += self.vel
+        if self.pos.x > WIDTH:
+            self.pos.x = 0
+        if self.pos.x < 0:
+            self.pos.x = WIDTH
+        if self.pos.y > HEIGHT:
+            self.pos.y = 0
+        if self.pos.y < 0:
+            self.pos.y = HEIGHT
+        self.rect.center = self.pos
+
+
