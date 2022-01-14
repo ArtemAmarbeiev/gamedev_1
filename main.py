@@ -287,3 +287,91 @@ def move_entities(hero, timeDelta):
     score = 0
     hero.sprite.move(screen.get_size(), timeDelta)
     return score
+def lops():
+    clock = pg.time.Clock()
+    global d_val, w_val, r_val, walls
+    enemy = []
+    print(d_val, w_val, r_val)
+    for i in range(d_val):
+        enemy.append(Mobse())
+    for i in range(w_val):
+        enemy.append(Mob())
+    for i in range(r_val):
+        enemy.append(Mobby())
+    
+    walls.append(Wall(100, 500, w=600, h=10))
+    walls.append(Wall(100, 100, w=10, h=400))
+    walls.append(Wall(690, 100, w=10, h=400))
+    walls.append(Wall(100, 100, w=600, h=10))
+    
+    paused = False
+    show_vectors = False
+    running = True
+    scoreFont = pg.font.Font("fonts/UpheavalPro.ttf", 30)
+    healthFont = pg.font.Font("fonts/OmnicSans.ttf", 50)
+    healthRender = healthFont.render('z', True, pg.Color('red'))
+    pg.display.set_caption("Steer")
+    hero = pygame.sprite.GroupSingle(Player(screen.get_size()))
+    enemies = pygame.sprite.Group()
+    lastEnemy = 0
+    score = 0
+    while running:
+        keys = pg.key.get_pressed()
+        mouse = pygame.mouse.get_pressed()
+        # clock.tick(FPS)
+        process_mouse(mouse, hero)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    running = False
+                if event.key == pg.K_SPACE:
+                    paused = not paused
+                if event.key == pg.K_m:
+                    Mob()
+                if event.key == pg.K_w:
+                    hero.sprite.movementVector[1] -= 1
+                if event.key == pg.K_a:
+                    hero.sprite.movementVector[0] -= 1
+                if event.key == pg.K_s:
+                    hero.sprite.movementVector[1] += 1
+                if event.key == pg.K_d:
+                    hero.sprite.movementVector[0] += 1
+                if event.key == pg.K_1:
+                    hero.sprite.equippedWeapon = hero.sprite.availableWeapons[0]
+                if event.key == pg.K_2:
+                    hero.sprite.equippedWeapon = hero.sprite.availableWeapons[1]
+                if event.key == pg.K_3:
+                    hero.sprite.equippedWeapon = hero.sprite.availableWeapons[2]
+        currentTime = pg.time.get_ticks()
+        score += move_entities(hero, clock.get_time()/17)
+        render_entities(hero)
+        if not paused:
+            all_sprites.update()
+        pg.display.set_caption("{:.2f}".format(clock.get_fps()))
+        screen.fill(WHITE)
+        all_sprites.draw(screen)
+        for i in walls:
+            pygame.draw.rect(screen, LIGHTGRAY, i)
+        if show_vectors:
+            for sprite in all_sprites:
+                sprite.draw_vectors()
+        for hp in range(hero.sprite.health):
+            screen.blit(healthRender, (15 + hp*35, 0))
+        scoreRender = scoreFont.render(str(12), True, pg.Color('black'))
+        scoreRect = scoreRender.get_rect()
+        scoreRect.right = WIDTH - 20
+        scoreRect.top = 20
+        screen.blit(scoreRender, scoreRect)
+        
+        clock.tick(120)
+        pg.display.flip()
+
+
+def MyRab(value):
+    global r_val
+    try:
+        r_val = int(value)
+    except:
+        r_val = 0
