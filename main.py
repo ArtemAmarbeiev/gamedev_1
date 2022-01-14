@@ -286,17 +286,4 @@ def render_entities(hero):
 def move_entities(hero, timeDelta):
     score = 0
     hero.sprite.move(screen.get_size(), timeDelta)
-    # for proj in Wolf.projectiles:
-    #     proj.move(screen.get_size(), timeDelta)
-    #     if pygame.sprite.spritecollide(proj, hero, False):
-    #         proj.kill()
-    #         hero.sprite.health -= 1
-    #         if hero.sprite.health <= 0:
-    #             hero.sprite.alive = False
-    # for proj in Player.projectiles:
-    #     proj.move(screen.get_size(), timeDelta)
-    #     enemiesHit = pygame.sprite.spritecollide(proj, enemies, True)
-    #     if enemiesHit:
-    #         proj.kill()
-    #         score += len(enemiesHit)
     return score
