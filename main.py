@@ -375,3 +375,29 @@ def MyRab(value):
         r_val = int(value)
     except:
         r_val = 0
+def MyWolf(value):
+    global w_val
+    try:
+        w_val = int(value)
+    except:
+        w_val = 0
+
+def MyDOE(value):
+    global d_val
+    try:
+        d_val = int(value)
+    except:
+        d_val = 0
+
+if __name__ == "__main__":
+    pygame.init()
+    surface = pg.display.set_mode((800, 600))
+    menu = pygame_menu.Menu('Steering Behaviors', 800, 600,
+                       theme=pygame_menu.themes.THEME_DEFAULT)
+
+    menu.add.text_input('Num rab :', default='4',onchange= MyRab)
+    menu.add.text_input('Num wolf :', default='5',onchange= MyWolf)
+    menu.add.text_input('Num doe :', default='3',onchange= MyDOE)
+    menu.add.button('Play', lops)
+    menu.add.button('Quit', pygame_menu.events.EXIT)
+    menu.mainloop(surface)
